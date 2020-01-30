@@ -25,12 +25,10 @@ week1_sunday_details = week1_sunday.find_elements_by_class_name('date-details')[
 opponent_name = week1_sunday_details.find_elements_by_class_name('opponent-name')[0].get_property('innerText')
 opponent_tricode = week1_sunday_details.find_elements_by_class_name('opponent-tricode')[0].text
 
-#game1 > div.matchup-area > div.matchup > div.opponent-name
+#https://www.mlbstatic.com/team-logos/team-cap-on-light/113.svg
+
+driver.quit()
 
 print(week1_sunday_dom)
 print(opponent_tricode)
 print(opponent_name)
-
-#https://www.mlbstatic.com/team-logos/team-cap-on-light/113.svg
-
-driver.quit()
