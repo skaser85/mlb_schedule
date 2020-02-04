@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link href="https://fonts.googleapis.com/css?family=Martel+Sans&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css')  }}">
+  <title>Baseball Schedule</title>
+</head>
+<body>
+  <label for="teams">Teams</label>
+  <select id="teams">
+    <option value=""></option>
+    {% for (k, v) in teams_by_division|dictsort %}
+      <optgroup label="{{ k }}">
+        {% for team in v %}
+          <option value="{{ team }}">{{ team }}</option>
+        {% endfor %}
+      </optgroup>
+    {% endfor %}
+  </select>
+  <label for="months">Months</label>
+  <select id="months">
+    {% for month in months %}
+      <option value="{{ month }}">{{ month }}</option>
+    {% endfor %}
+  </select>
+  <button id="get-schedule">Get Schedule</button>
+
+  <table id="schedule-table" class="hidden">
+    <tr>
+      <th colspan="7" class="title-row">
+        <span class="title-row-item">
+          <img id="home-team-logo" class="logo title-row-logo"></img> 
+          <span id="home-team-name"></span>
+        </span>
+        <span class="title-row-item">
+          <span id="month-text"></span> 
+          <span id="year-text"></span>
+        </span>
+      </th>
+    </tr>
+    <tr id="table-days" class="week-row">
+      <th>Sunday</th>
+      <th>Monday</th>
+      <th>Tuesday</th>
+      <th>Wednesday</th>
+      <th>Thursday</th>
+      <th>Friday</th>
+      <th>Saturday</th>
+    </tr>
+  </table>
+
+  <script>
+    selTeams = document.querySelector("#teams");
+    selMonths = document.querySelector("#months");
+    btnGetSchedule = document.querySelector("#get-schedule");
+    tblSchedule = document.querySelector("#schedule-table");
+    tblMonthText = document.querySelector("#month-text");
+    tblYearText = document.querySelector("#year-text");
+    tblHomeLogo = document.querySelector("#home-team-logo");
+    tblHomeTeamName = document.querySelector("#home-team-name");
+
+    btnGetSchedule.addEventListener("click", () => {
+      data = JSON.stringify({team: selTeams.value, month: selMonths.value});
+      sendDataToServer("http://localhost:5000/schedule", "POST", data)
+        .then(resp => {
+          console.log(resp);
+          tblSchedule.classList.toggle("hidden");
+          
+          tblMonthText.innerText = resp.month;
+          tblYearText.innerText = resp.year;
+          tblHomeTeamName.innerText = selTeams.value;
+          // tblHomeLogo.src = `/static/logos/${selTeams.opponent_tricode}_on_light.svg`;
+          tblHomeLogo.src = `/static/logos/CIN_on_light.svg`;
+
+          Object.keys(resp.weeks).forEach((wk, i) => {
+            weekData = resp.weeks[wk]
+            wkNum = i + 1;
+            weekID = "#week-" + (wkNum).toString();
+            weekEl = tblSchedule.insertRow(wkNum + 1);
+            weekEl.setAttribute("id", weekID);
+            weekEl.setAttribute("class", "week-row");
+            Object.keys(weekData).forEach((day, i) => {
+              dayData = weekData[day]
+              dayEl = weekEl.insertCell(i)
+              dayEl.setAttribute("id", weekID + "-" + day.toLowerCase());
+              dayEl.setAttribute("class", "day-cell");
+              createDayCellLayout(dayEl);
+              if(dayData.day_of_the_month) {
+                dayEl.querySelector(".dotm").innerText = dayData.day_of_the_month;
+                if(dayData.data.Game1.game_exists) {
+                  dayEl.querySelector(".game1-opponent").innerText = dayData.data.Game1.opponent;
+                  dayEl.querySelector(".game1-start-time").innerText = dayData.data.Game1.start_time;
+                  if(dayData.data.Game1.opponent_tricode !== "TBD") {
+                    dayEl.querySelector(".game1-opponent-logo").src = `/static/logos/${dayData.data.Game1.opponent_tricode}_on_light.svg`;
+                  }
+                    if(dayData.data.Game2.game_exists) {
+                    dayEl.querySelector(".game2-opponent").innerText = dayData.data.Game2.opponent;
+                    dayEl.querySelector(".game2-start-time").innerText = dayData.data.Game2.start_time;
+                    if(dayData.data.Game2.opponent_tricode !== "TBD") {
+                      dayEl.querySelector(".game2-opponent-logo").src = `/static/logos/${dayData.data.Game2.opponent_tricode}_on_light.svg`;
+                    }
+                  }
+                }
+              }
+            });
+          });
+        })
+    });
+
+    function createDayCellLayout(dayEl) {
+      dotmSpan = document.createElement("SPAN");
+      dotmSpan.setAttribute("class", "dotm");
+      dayEl.appendChild(dotmSpan);
+      g1OppoLogo = document.createElement("IMG");
+      g1OppoLogo.setAttribute("class", "game1-opponent-logo logo");
+      dayEl.appendChild(g1OppoLogo);
+      g1Oppo = document.createElement("SPAN");
+      g1Oppo.setAttribute("class", "game1-opponent");
+      dayEl.appendChild(g1Oppo);
+      g1Start = document.createElement("SPAN");
+      g1Start.setAttribute("class", "game1-start-time");
+      dayEl.appendChild(g1Start);
+      g2OppoLogo = document.createElement("IMG");
+      g2OppoLogo.setAttribute("class", "game2-opponent-logo logo");
+      dayEl.appendChild(g2OppoLogo);
+      g2Oppo = document.createElement("SPAN");
+      g2Oppo.setAttribute("class", "game2-opponent");
+      dayEl.appendChild(g2Oppo);
+      g2Start = document.createElement("SPAN");
+      g2Start.setAttribute("class", "game2-start-time");
+      dayEl.appendChild(g2Start);
+    }
+
+    async function sendDataToServer(URL, method, system_data) {
+      let resp = await fetch(URL, {
+          method: method,
+          header: new Headers(),
+          body: system_data
+      }).then(resp => resp.json())
+      .then(data => data)
+      .catch(err => err);
+      return resp;
+    }
+  </script>
+</body>
+</html>

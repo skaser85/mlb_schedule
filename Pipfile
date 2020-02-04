@@ -12,6 +12,8 @@ beautifulsoup4 = "*"
 lxml = "*"
 selenium = "*"
 pandas = "*"
+flask = "*"
+flask-cors = "*"
 
 [requires]
 python_version = "3.8"
