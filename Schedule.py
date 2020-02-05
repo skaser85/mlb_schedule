@@ -93,9 +93,7 @@ if __name__ == "__main__":
     schedule_data = json.loads(f.read())
   team_data = [t for t in teams_data if t['teamName'].lower() == team][0]
   team_abbr = team_data['abbreviation']
-  msg = ''
   if not schedule_data.get(team_abbr):
-    msg = team_abbr + 'didn\'t exist'
     schedule = Schedule(team, month, year)
     schedule_data[team_abbr] = {
       'data': team_data,
@@ -106,15 +104,11 @@ if __name__ == "__main__":
       }
     }
   elif not schedule_data[team_abbr]['schedule'].get(year):
-    msg = team_abbr + ' ' + str(year) + ' didn\'t exist'
     schedule = Schedule(team, month, year)
     schedule_data[team_abbr]['schedule'][year] = { month: schedule.month_data }
   elif not schedule_data[team_abbr]['schedule'][year].get(month):
-    msg = team_abbr + ' '  + str(year) + ' ' + month + 'didn\'t exist'
     schedule = Schedule(team, month, year)
     schedule_data[team_abbr]['schedule'][year][month] = schedule.month_data
-
-  print(msg)
 
   with open('schedule_data.json', 'w') as f:
     f.write(json.dumps(schedule_data))

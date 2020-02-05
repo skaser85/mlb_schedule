@@ -15,7 +15,7 @@
     {% for (k, v) in teams_by_division|dictsort %}
       <optgroup label="{{ k }}">
         {% for team in v %}
-          <option value="{{ team }}">{{ team }}</option>
+          <option value="{{ team['abbr'] }}">{{ team['name'] }}</option>
         {% endfor %}
       </optgroup>
     {% endfor %}
@@ -64,6 +64,7 @@
 
     btnGetSchedule.addEventListener("click", () => {
       data = JSON.stringify({team: selTeams.value, month: selMonths.value});
+      console.log(data);
       sendDataToServer("http://localhost:5000/schedule", "POST", data)
         .then(resp => {
           console.log(resp);
@@ -71,9 +72,8 @@
           
           tblMonthText.innerText = resp.month;
           tblYearText.innerText = resp.year;
-          tblHomeTeamName.innerText = selTeams.value;
-          // tblHomeLogo.src = `/static/logos/${selTeams.opponent_tricode}_on_light.svg`;
-          tblHomeLogo.src = `/static/logos/CIN_on_light.svg`;
+          tblHomeTeamName.innerText = selTeams.selectedOptions[0].text;
+          tblHomeLogo.src = `/static/logos/${selTeams.value}_on_light.svg`;
 
           Object.keys(resp.weeks).forEach((wk, i) => {
             weekData = resp.weeks[wk]
