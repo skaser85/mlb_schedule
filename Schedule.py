@@ -10,7 +10,7 @@ class Schedule:
   chrome_options = Options()
   chrome_options.add_argument('--headless')
   chrome_options.add_argument('--window-size=1920x1080')
-  driver = Chrome(executable_path='chromedriver.exe', chrome_options=chrome_options)
+  chrome_path = 'chromedriver.exe'
 
   def __init__(self, team, month_name, year):
     self.team = team
@@ -30,6 +30,7 @@ class Schedule:
         'week6': {}
       }
     }
+    self.driver = Chrome(executable_path=self.chrome_path, chrome_options=self.chrome_options)
     self.getSchedule()
 
   def getMonthNum(self):
@@ -84,7 +85,7 @@ class Schedule:
     self.driver.quit()
 
 if __name__ == "__main__":
-  team = 'indians'
+  team = 'marlins'
   month = 'March'
   year = '2020'
   with open('teams_data.json', 'r') as f:

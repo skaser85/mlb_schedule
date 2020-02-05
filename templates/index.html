@@ -29,7 +29,7 @@
   <button id="get-schedule">Get Schedule</button>
 
   <table id="schedule-table" class="hidden">
-    <tr>
+    <tr id="title-row">
       <th colspan="7" class="title-row">
         <span class="title-row-item">
           <img id="home-team-logo" class="logo title-row-logo"></img> 
@@ -68,7 +68,11 @@
       sendDataToServer("http://localhost:5000/schedule", "POST", data)
         .then(resp => {
           console.log(resp);
-          tblSchedule.classList.toggle("hidden");
+          if(tblSchedule.classList.contains("hidden")) {
+            tblSchedule.classList.toggle("hidden");
+          }
+
+          [...tblSchedule.querySelectorAll("tr")].slice(2).forEach(r => r.remove());
           
           tblMonthText.innerText = resp.month;
           tblYearText.innerText = resp.year;
